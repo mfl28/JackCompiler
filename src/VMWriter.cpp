@@ -15,7 +15,7 @@ namespace JackCompiler {
             { VMWriter::Segment::STATIC,  "static" },
             { VMWriter::Segment::TEMP,    "temp" },
             { VMWriter::Segment::THAT,    "that" },
-            { VMWriter::Segment::THIS,    "constant" }
+            { VMWriter::Segment::THIS,    "this" }
         };
 
         const unordered_map<VMWriter::Command, string> COMMAND_TO_NAME{

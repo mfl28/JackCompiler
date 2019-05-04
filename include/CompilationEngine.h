@@ -2,6 +2,7 @@
 #include "Tokenizer.h"
 #include "SymbolTable.h"
 #include <istream>
+#include "VMWriter.h"
 
 namespace JackCompiler {
     class CompilationEngine;
@@ -10,18 +11,19 @@ namespace JackCompiler {
 class JackCompiler::CompilationEngine {
 public:
     CompilationEngine(std::istream& inputStream, std::ostream& outputStream) 
-        : tokenizer_(inputStream), outputStream_(outputStream) {}
+        : tokenizer_(inputStream), vmWriter_(outputStream) {}
 
     void compileClass();
 
 private:
     SymbolTable symbolTable_;
     Tokenizer tokenizer_;
-    std::ostream& outputStream_;
-    size_t currentIndentionLevel_ = 0;
-
-    void openNonTerminalTag(const std::string& name);
-    void closeNonTerminalTag(const std::string& name);
+    VMWriter vmWriter_;
+    std::string className_;
+    std::string currentSubroutineName_;
+    Tokenizer::KeyWordType currentSubroutineType_{};
+    size_t currentIfLabelIndex_{};
+    size_t currentWhileLabelIndex_{};
 
     void compileClassVarDec();
     void compileSubroutineDec();
@@ -36,7 +38,7 @@ private:
     void compileReturn();
     void compileExpression();
     void compileTerm();
-    void compileExpressionList();
+    int compileExpressionList();
 
     bool classVarDecEncountered() const;
     bool subroutineDecEncountered() const;
@@ -51,10 +53,12 @@ private:
     bool tryParseKeyword(Tokenizer::KeyWordType expectedKeywordType) const;
     void parseKeyword(std::initializer_list<Tokenizer::KeyWordType> validKeywordTypes) const;
     bool tryParseKeyword(std::initializer_list<Tokenizer::KeyWordType> validKeywordTypes) const;
-    void parseIdentifier();
+    void parseIdentifier() const;
+    bool tryParseIdentifier() const;
     void parseIdentifierAsVariableDefinition(SymbolTable::SymbolKind kind, const std::string& type);
     void parseIdentifierAsSubroutineDefinition();
     void parseIdentifierAsClassName();
+    void parseIdentifierAsClassNameDefinition();
     bool tryParseIdentifierAsClassName();
     void parseIdentifierAsSubroutineName();
     void parseOpSymbol() const;
@@ -66,4 +70,9 @@ private:
     void parseSubroutineReturnType();
     std::string parseVariableType();
     void processSubroutineCall();
+    bool tryProcessAssignmentArrayElementAccess(const std::string& arrayVarName);
+    void processExpressionArrayElementAccess(const std::string& arrayVarName);
+    void processForeignMethodCall(const std::string& prefixName);
+    void processFunctionCall(const std::string& prefixName);
+    void processOwnMethodCall(const std::string& functionName);
 };

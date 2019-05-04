@@ -2,5 +2,5 @@
 #include <string>
 
 namespace JackCompiler{
-    void compile(const std::string& inputPathName);
+    int compile(const std::string& inputPathName);
 }

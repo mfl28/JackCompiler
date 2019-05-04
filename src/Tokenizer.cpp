@@ -4,6 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <unordered_map>
+#include <iostream>
 
 using std::vector;
 using std::pair;
@@ -72,8 +73,14 @@ namespace JackCompiler {
                 for(auto i = firstNonWhitespaceIndex; i != length; ++i) {
                     if(!inBlockComment) {
                         if(!inStringLiteral) {
-                            if(line[i] == ' ') {
+                            if(line[i] == ' ' || line[i] == '\t') {
                                 if(ignoreWhitespace) {
+                                    continue;
+                                }
+
+                                if(line[i] == '\t') {
+                                    s << ' ';
+                                    ignoreWhitespace = true;
                                     continue;
                                 }
 
@@ -117,7 +124,7 @@ namespace JackCompiler {
 
                 line = s.str();
 
-                if(!line.empty() && line.back() == ' ') {
+                if(!line.empty() && (line.back() == ' ' || line.back() == '\t')) {
                     line.pop_back();
                 }
             }
@@ -200,7 +207,7 @@ namespace JackCompiler {
             currentTokenType_ = it->first;
         }
         else {
-            throw runtime_error("Invalid token in line " + std::to_string(currentLineNr_) + ": " + currentToken_);
+            throw runtime_error("Invalid token in line " + std::to_string(currentLineNr_) + ": >>" + currentToken_ + "<<");
         }
 
         if(currentTokenType_ == Tokenizer::TokenType::KEYWORD) {

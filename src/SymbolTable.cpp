@@ -17,8 +17,16 @@ namespace JackCompiler {
     }
 
     int SymbolTable::varCount(SymbolKind kind) const {
-        return (kind == SymbolKind::STATIC || kind == SymbolKind::FIELD) ?
-            classScopeVarCount_.at(kind) : subroutineScopeVarCount_.at(kind);
+        if(kind == SymbolKind::STATIC || kind == SymbolKind::FIELD) {
+            if(const auto it = classScopeVarCount_.find(kind); it != classScopeVarCount_.cend()) {
+                return it->second;
+            }
+        }
+        else if(const auto it = subroutineScopeVarCount_.find(kind); it != subroutineScopeVarCount_.cend()) {
+            return it->second;
+        }
+
+        return 0;
     }
 
     SymbolTable::SymbolKind SymbolTable::kindOf(const std::string & name) {
@@ -40,7 +48,6 @@ namespace JackCompiler {
             if(const auto it = subroutineScopeTable_.find(name); it != subroutineScopeTable_.cend()) {
                 return it->second.type;
             }
-            
         }
 
         if(const auto it = classScopeTable_.find(name); it != classScopeTable_.cend()) {
