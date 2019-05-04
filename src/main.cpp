@@ -1,23 +1,14 @@
-#include "CompilationEngine.h"
-#include <iostream>
 #include "JackCompiler.h"
+#include <iostream>
 
 using std::cout;
-using std::flush;
+using std::endl;
 
 int main(int argc, char** argv) {
     if(argc == 2) {
-        try {
-            return JackCompiler::compile(argv[1]);
-        }
-        catch(const std::exception& e) {
-            std::cout << e.what() << flush;
-            return -1;
-        }
-        
+        return JackCompiler::compile(argv[1]);
     }
 
-    cout << "Wrong number of arguments: Usage: JackCompiler <filename.jack OR directoryName>" << flush;
-
+    cout << "Wrong number of arguments: Usage: JackCompiler <<filename>.jack OR <directoryName>>" << endl;
     return -1;
 }

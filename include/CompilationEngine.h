@@ -1,8 +1,8 @@
 #pragma once
 #include "Tokenizer.h"
 #include "SymbolTable.h"
-#include <istream>
 #include "VMWriter.h"
+#include <istream>
 
 namespace JackCompiler {
     class CompilationEngine;
@@ -10,9 +10,19 @@ namespace JackCompiler {
 
 class JackCompiler::CompilationEngine {
 public:
+    /**
+     * \brief Creates a new compilation engine that provides the functionality
+     * to compile Jack code in a provided input-stream to Hack virtual-machine language
+     * and write the result to a provided output-stream
+     * \param inputStream 
+     * \param outputStream 
+     */
     CompilationEngine(std::istream& inputStream, std::ostream& outputStream) 
-        : tokenizer_(inputStream), vmWriter_(outputStream) {}
+        : tokenizer_{inputStream}, vmWriter_{outputStream} {}
 
+    /**
+     * \brief Compiles a complete class.
+     */
     void compileClass();
 
 private:

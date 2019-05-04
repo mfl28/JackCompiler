@@ -100,14 +100,15 @@ namespace JackCompiler {
         parseSymbol('}');
 
         if(tokenizer_.hasMoreTokens()) {
-            throw runtime_error("Illegal occurence of tokens after the end of a class definition.");
+            throw runtime_error{"Illegal occurence of tokens after the end of the class definition."};
         }
     }
 
     void CompilationEngine::compileClassVarDec() {
         parseKeyword({Tokenizer::KeyWordType::STATIC, Tokenizer::KeyWordType::FIELD});
 
-        const auto symbolKind = tokenizer_.keyWord() == Tokenizer::KeyWordType::STATIC ? SymbolTable::SymbolKind::STATIC : SymbolTable::SymbolKind::FIELD;
+        const auto symbolKind = (tokenizer_.keyWord() == Tokenizer::KeyWordType::STATIC ?
+            SymbolTable::SymbolKind::STATIC : SymbolTable::SymbolKind::FIELD);
         tokenizer_.advance();
 
         const auto type = parseVariableType();
@@ -130,7 +131,8 @@ namespace JackCompiler {
         currentIfLabelIndex_ = 0;
         currentWhileLabelIndex_ = 0;
 
-        parseKeyword({Tokenizer::KeyWordType::CONSTRUCTOR, Tokenizer::KeyWordType::FUNCTION, Tokenizer::KeyWordType::METHOD});
+        parseKeyword({Tokenizer::KeyWordType::CONSTRUCTOR, Tokenizer::KeyWordType::FUNCTION,
+            Tokenizer::KeyWordType::METHOD});
         currentSubroutineType_ = tokenizer_.keyWord();
         tokenizer_.advance();
         parseSubroutineReturnType();
@@ -180,8 +182,8 @@ namespace JackCompiler {
             compileVarDec();
         }
 
-        // function init
-        vmWriter_.writeFunction(className_ + "." + currentSubroutineName_, symbolTable_.varCount(SymbolTable::SymbolKind::VAR));
+        vmWriter_.writeFunction(className_ + "." + currentSubroutineName_, 
+            symbolTable_.varCount(SymbolTable::SymbolKind::VAR));
 
         if(currentSubroutineType_ == Tokenizer::KeyWordType::METHOD) {
             vmWriter_.writePush(VMWriter::Segment::ARG, 0);
@@ -189,11 +191,11 @@ namespace JackCompiler {
 
         }
         else if(currentSubroutineType_ == Tokenizer::KeyWordType::CONSTRUCTOR) {
-            vmWriter_.writePush(VMWriter::Segment::CONST, symbolTable_.varCount(SymbolTable::SymbolKind::FIELD));
+            vmWriter_.writePush(VMWriter::Segment::CONST, 
+                symbolTable_.varCount(SymbolTable::SymbolKind::FIELD));
             vmWriter_.writeCall("Memory.alloc", 1);
             vmWriter_.writePop(VMWriter::Segment::POINTER, 0);
         }
-        // end function init
 
         compileStatements();
 
@@ -238,7 +240,8 @@ namespace JackCompiler {
                     compileReturn();
                     break;
                 default:
-                    throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid statement.");
+                    throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + 
+                        ": Invalid statement."};
             }
         }
     }
@@ -432,11 +435,13 @@ namespace JackCompiler {
             vmWriter_.writeArithmetic(UNARY_OP_SYMBOL_TO_COMMAND.at(symbol));
         }
         else if(tryParseIntConst()) {
+            // integer constant
             vmWriter_.writePush(VMWriter::Segment::CONST, tokenizer_.intVal());
 
             tokenizer_.advance();
         }
         else if(tryParseStringConst()) {
+            // string constant
             const auto stringValue = tokenizer_.stringVal();
 
             vmWriter_.writePush(VMWriter::Segment::CONST, stringValue.size());
@@ -449,7 +454,8 @@ namespace JackCompiler {
 
             tokenizer_.advance();
         }
-        else if(tryParseKeyword({Tokenizer::KeyWordType::TRUE, Tokenizer::KeyWordType::FALSE, Tokenizer::KeyWordType::NULL_, Tokenizer::KeyWordType::THIS})) {
+        else if(tryParseKeyword({Tokenizer::KeyWordType::TRUE, Tokenizer::KeyWordType::FALSE, 
+            Tokenizer::KeyWordType::NULL_, Tokenizer::KeyWordType::THIS})) {
             // keyWord OR integerConstant OR stringConstant
             const auto keyword = tokenizer_.keyWord();
 
@@ -501,7 +507,8 @@ namespace JackCompiler {
             }
         }
         else {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid term-construct.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + 
+                ": Invalid term-construct."};
         }
     }
 
@@ -524,14 +531,16 @@ namespace JackCompiler {
 
     void CompilationEngine::processSubroutineCall() {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::IDENTIFIER) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid subroutine-call.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) +
+                ": Invalid subroutine-call."};
         }
 
         const auto identifier = tokenizer_.identifier();
         tokenizer_.advance();
 
         if(symbolTable_.kindOf(identifier) == SymbolTable::SymbolKind::NONE) {
-            // The definition of the Jack-language implies that if in an error-free program, an identifier is not of type STATIC, FIELD, ARG or VAR
+            // The definition of the Jack-language implies that if in an error-free program, an 
+            // identifier is not of type STATIC, FIELD, ARG or VAR
             // then it must be either a subroutine-name or a class-name
             // methodName(expressionList) OR className.functionName(expressionList)
             if(tryParseSymbol('.')) {
@@ -547,12 +556,13 @@ namespace JackCompiler {
         else {
             // .methodName(expressionList)
             if(tryParseSymbol('.')) {
-                
+
                 tokenizer_.advance();
                 processForeignMethodCall(identifier);
             }
             else {
-                throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid subroutine-call.");
+                throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) +
+                    ": Invalid subroutine-call."};
             }
         }
     }
@@ -564,7 +574,8 @@ namespace JackCompiler {
 
             parseSymbol(']');
 
-            vmWriter_.writePush(SYMBOL_KIND_TO_SEGMENT.at(symbolTable_.kindOf(arrayVarName)), symbolTable_.indexOf(arrayVarName));
+            vmWriter_.writePush(SYMBOL_KIND_TO_SEGMENT.at(symbolTable_.kindOf(arrayVarName)), 
+                symbolTable_.indexOf(arrayVarName));
             vmWriter_.writeArithmetic(VMWriter::Command::ADD);
             tokenizer_.advance();
             return true;
@@ -578,7 +589,8 @@ namespace JackCompiler {
 
         parseSymbol(']');
 
-        vmWriter_.writePush(SYMBOL_KIND_TO_SEGMENT.at(symbolTable_.kindOf(arrayVarName)), symbolTable_.indexOf(arrayVarName));
+        vmWriter_.writePush(SYMBOL_KIND_TO_SEGMENT.at(symbolTable_.kindOf(arrayVarName)), 
+            symbolTable_.indexOf(arrayVarName));
         vmWriter_.writeArithmetic(VMWriter::Command::ADD);
         vmWriter_.writePop(VMWriter::Segment::POINTER, 1);
         vmWriter_.writePush(VMWriter::Segment::THAT, 0);
@@ -592,7 +604,8 @@ namespace JackCompiler {
         const auto calledSubroutineName = tokenizer_.identifier();
         tokenizer_.advance();
 
-        vmWriter_.writePush(SYMBOL_KIND_TO_SEGMENT.at(symbolTable_.kindOf(prefixName)), symbolTable_.indexOf(prefixName));
+        vmWriter_.writePush(SYMBOL_KIND_TO_SEGMENT.at(symbolTable_.kindOf(prefixName)), 
+            symbolTable_.indexOf(prefixName));
 
         parseSymbol('(');
         tokenizer_.advance();
@@ -602,7 +615,7 @@ namespace JackCompiler {
         parseSymbol(')');
 
         vmWriter_.writeCall(symbolTable_.typeOf(prefixName) + "." + calledSubroutineName, nrArgs + 1);
- 
+
         tokenizer_.advance();
     }
 
@@ -636,9 +649,6 @@ namespace JackCompiler {
 
         tokenizer_.advance();
     }
-
-
-
 
     bool CompilationEngine::classVarDecEncountered() const {
         return tokenizer_.tokenType() == Tokenizer::TokenType::KEYWORD &&
@@ -694,12 +704,12 @@ namespace JackCompiler {
 
     void CompilationEngine::parseSymbol(char expectedSymbol) const {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::SYMBOL) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a symbol-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a symbol-token."};
         }
 
         if(const auto symbol = tokenizer_.symbol();  symbol != expectedSymbol) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected symbol \"" +
-                to_string(expectedSymbol) + "\" but got \"" + to_string(symbol) + "\".");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected symbol \"" +
+                to_string(expectedSymbol) + "\" but got \"" + to_string(symbol) + "\"."};
         }
     }
 
@@ -709,11 +719,11 @@ namespace JackCompiler {
 
     void CompilationEngine::parseOpSymbol() const {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::SYMBOL) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a symbol-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a symbol-token."};
         }
 
         if(find(OPS.cbegin(), OPS.cend(), tokenizer_.symbol()) == OPS.cend()) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected operation symbol.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected operation symbol."};
         }
     }
 
@@ -724,11 +734,11 @@ namespace JackCompiler {
 
     void CompilationEngine::parseUnaryOpSymbol() const {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::SYMBOL) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a symbol-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a symbol-token."};
         }
 
         if(find(UNARY_OPS.cbegin(), UNARY_OPS.cend(), tokenizer_.symbol()) == UNARY_OPS.cend()) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected unary-operation symbol.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected unary-operation symbol."};
         }
     }
 
@@ -739,12 +749,12 @@ namespace JackCompiler {
 
     void CompilationEngine::parseKeyword(Tokenizer::KeyWordType expectedKeywordType) const {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::KEYWORD) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a keyword-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a keyword-token."};
         }
 
         if(const auto keyword = tokenizer_.keyWord(); keyword != expectedKeywordType) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected keyword \"" +
-                KEYWORD_TYPE_TO_STRING.at(expectedKeywordType) + "\" but got \"" + KEYWORD_TYPE_TO_STRING.at(keyword) + "\".");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected keyword \"" +
+                KEYWORD_TYPE_TO_STRING.at(expectedKeywordType) + "\" but got \"" + KEYWORD_TYPE_TO_STRING.at(keyword) + "\"."};
         }
     }
 
@@ -754,11 +764,13 @@ namespace JackCompiler {
 
     void CompilationEngine::parseKeyword(initializer_list<Tokenizer::KeyWordType> validKeywordTypes) const {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::KEYWORD) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a keyword-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a keyword-token."};
         }
 
-        if(const auto keyword = tokenizer_.keyWord(); find(validKeywordTypes.begin(), validKeywordTypes.end(), keyword) == validKeywordTypes.end()) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid keyword \"" + KEYWORD_TYPE_TO_STRING.at(keyword) + "\".");
+        if(const auto keyword = tokenizer_.keyWord(); find(validKeywordTypes.begin(), 
+            validKeywordTypes.end(), keyword) == validKeywordTypes.end()) {
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) +
+                ": Invalid keyword \"" + KEYWORD_TYPE_TO_STRING.at(keyword) + "\"."};
         }
     }
 
@@ -774,13 +786,13 @@ namespace JackCompiler {
 
     void CompilationEngine::parseIdentifierAsVariableDefinition(SymbolTable::SymbolKind kind, const std::string& type) {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::IDENTIFIER) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token."};
         }
 
         const auto identifier = tokenizer_.identifier();
 
         if(const auto symbolKind = symbolTable_.kindOf(identifier); symbolKind != SymbolTable::SymbolKind::NONE && symbolKind == kind) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Redefinition of identifier in same scope.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Redefinition of identifier in same scope."};
         }
 
         symbolTable_.define(identifier, type, kind);
@@ -788,27 +800,28 @@ namespace JackCompiler {
 
     void CompilationEngine::parseIdentifierAsSubroutineDefinition() {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::IDENTIFIER) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token."};
         }
 
         if(symbolTable_.kindOf(tokenizer_.identifier()) != SymbolTable::SymbolKind::NONE) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid definition of a subroutine with the same name as a static/field variable.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) +
+                ": Invalid definition of a subroutine with the same name as a static/field variable."};
         }
     }
 
     void CompilationEngine::parseIdentifier() const {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::IDENTIFIER) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token."};
         }
     }
 
     void CompilationEngine::parseIdentifierAsClassName() {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::IDENTIFIER) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token."};
         }
 
         if(symbolTable_.kindOf(tokenizer_.identifier()) != SymbolTable::SymbolKind::NONE) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a class-name.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected a class-name."};
         }
     }
 
@@ -820,7 +833,7 @@ namespace JackCompiler {
     void CompilationEngine::parseIdentifierAsClassNameDefinition() {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::IDENTIFIER ||
             symbolTable_.kindOf(tokenizer_.identifier()) != SymbolTable::SymbolKind::NONE) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid class definition.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid class definition."};
         }
 
         className_ = tokenizer_.identifier();
@@ -828,11 +841,11 @@ namespace JackCompiler {
 
     void CompilationEngine::parseIdentifierAsSubroutineName() {
         if(tokenizer_.tokenType() != Tokenizer::TokenType::IDENTIFIER) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an identifier-token."};
         }
 
         if(symbolTable_.kindOf(tokenizer_.identifier()) != SymbolTable::SymbolKind::NONE) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an subroutine-name.");
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Expected an subroutine-name."};
         }
     }
 
@@ -853,13 +866,13 @@ namespace JackCompiler {
             return tokenizer_.identifier();
         }
 
-        throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid type.");
+        throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid type."};
     }
 
     void CompilationEngine::parseSubroutineReturnType() {
-        if(!tryParseKeyword({Tokenizer::KeyWordType::VOID, Tokenizer::KeyWordType::INT, Tokenizer::KeyWordType::CHAR, Tokenizer::KeyWordType::BOOLEAN}) &&
-            !tryParseIdentifierAsClassName()) {
-            throw runtime_error("Error on line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid subroutine return-type.");
+        if(!tryParseKeyword({Tokenizer::KeyWordType::VOID, Tokenizer::KeyWordType::INT, 
+            Tokenizer::KeyWordType::CHAR, Tokenizer::KeyWordType::BOOLEAN}) && !tryParseIdentifierAsClassName()) {
+            throw runtime_error{"On line " + to_string(tokenizer_.getCurrentLine()) + ": Invalid subroutine return-type."};
         }
     }
 }

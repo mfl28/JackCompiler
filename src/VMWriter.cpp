@@ -44,23 +44,23 @@ namespace JackCompiler {
         outputStream_ << COMMAND_TO_NAME.at(command) << '\n';
     }
 
-    void VMWriter::writeLabel(const std::string& label) const {
+    void VMWriter::writeLabel(const string& label) const {
         outputStream_ << "label " << label << '\n';
     }
 
-    void VMWriter::writeGoto(const std::string& label) const {
+    void VMWriter::writeGoto(const string& label) const {
         outputStream_ << "goto " << label << '\n';
     }
 
-    void VMWriter::writeIf(const std::string& label) const {
+    void VMWriter::writeIf(const string& label) const {
         outputStream_ << "if-goto " << label << '\n';
     }
 
-    void VMWriter::writeCall(const std::string& name, int nArgs) const {
+    void VMWriter::writeCall(const string& name, int nArgs) const {
         outputStream_ << "call " << name << ' ' << nArgs <<  '\n';
     }
 
-    void VMWriter::writeFunction(const std::string& name, int nLocals) const {
+    void VMWriter::writeFunction(const string& name, int nLocals) const {
         outputStream_ << "function " << name << ' ' << nLocals << '\n';
     }
 
