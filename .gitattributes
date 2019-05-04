@@ -1,0 +1,2 @@
+# Ignore test-files for github repository-language determination
+test/test-files/* linguist-vendored
