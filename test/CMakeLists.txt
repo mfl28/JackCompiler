@@ -4,6 +4,7 @@ set(PROJECT_TESTS_NAME ${PROJECT_NAME}Tests)
 
 # Files
 set(TEST_SOURCES main.cpp
+				 CompilationEngineTests.cpp
 )
 
 add_executable(${PROJECT_TESTS_NAME} ${TEST_SOURCES})
@@ -20,4 +21,7 @@ set_target_properties(${PROJECT_TESTS_NAME} PROPERTIES
     CXX_EXTENSIONS NO
 )
 
-add_test(NAME ${PROJECT_TESTS_NAME} COMMAND ${PROJECT_TESTS_NAME})
+# Add tests and pass test-files directory path as an argument to gtest
+# Note: Testing directly from the test-explorer in VS Studio 2017 (tested with version 15.9.11) does not seem
+#       to take the argument into account, use ctest instead.  
+add_test(NAME ${PROJECT_TESTS_NAME} COMMAND ${PROJECT_TESTS_NAME} "${CMAKE_CURRENT_LIST_DIR}/test-files/")
