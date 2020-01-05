@@ -2,17 +2,17 @@ cmake_minimum_required(VERSION 3.12)
 
 set(PROJECT_TESTS_NAME ${PROJECT_NAME}Tests)
 
-# Files
-set(TEST_SOURCES main.cpp
-				 CompilationEngineTests.cpp
-)
+add_executable(${PROJECT_TESTS_NAME})
+target_sources(${PROJECT_TESTS_NAME} PRIVATE
+                                     main.cpp
+                                     CompilationEngineTests.cpp
+)           
 
-add_executable(${PROJECT_TESTS_NAME} ${TEST_SOURCES})
-target_link_libraries(${PROJECT_TESTS_NAME} gtest ${PROJECT_LIB_NAME})
+target_link_libraries(${PROJECT_TESTS_NAME} gtest ${LIB_NAME})
 
 # If gcc is used, it is necessary to link stdc++fs for std::filename support
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	target_link_libraries(${PROJECT_TESTS_NAME} stdc++fs)
+    target_link_libraries(${PROJECT_TESTS_NAME} stdc++fs)
 endif()
 
 set_target_properties(${PROJECT_TESTS_NAME} PROPERTIES 
