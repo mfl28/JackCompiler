@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.14)
 
 set(PROJECT_TESTS_NAME ${PROJECT_NAME}Tests)
+
+include(fetch_googletest)
 
 add_executable(${PROJECT_TESTS_NAME})
 target_sources(${PROJECT_TESTS_NAME} PRIVATE
