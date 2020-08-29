@@ -1,0 +1,38 @@
+# Job template
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/templates
+
+parameters:
+  name: ''
+  pool: ''
+  platform: ''
+  buildConfig: 'Debug'
+  buildVariables: {}
+
+jobs:
+- job: ${{ parameters.name }}
+  pool: ${{ parameters.pool }}
+  variables:
+    ${{ insert  }}: ${{ parameters.buildVariables }}
+  steps:
+  - task: CMake@1
+    displayName: 'CMake version'
+    inputs:
+      cmakeArgs: '--version'
+  - task: CMake@1
+    displayName: 'CMake generate'
+    inputs:
+      cmakeArgs: '.. -D CMAKE_BUILD_TYPE=${{ parameters.buildConfig }}'
+  - task: CMake@1
+    displayName: 'CMake build'
+    inputs:
+      cmakeArgs: '--build . --config ${{ parameters.buildConfig }}'
+  - task: ArchiveFiles@2
+    displayName: 'Archive build to build.zip'
+    inputs:
+      rootFolderOrFile: '$(Build.SourcesDirectory)/build'
+      archiveFile: '$(Build.SourcesDirectory)/build.zip'
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish build.zip'
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/build.zip'
+      artifact: 'build-${{ parameters.platform  }}-${{ parameters.buildConfig }}'

@@ -1,0 +1,36 @@
+# Job template
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/templates
+
+parameters:
+  name: ''
+  pool: ''
+  platform: ''
+  buildConfig: 'Debug'
+
+jobs:
+- job: ${{ parameters.name }}
+  pool: ${{ parameters.pool }}
+  steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download build.zip'
+    inputs:
+      artifact: 'build-${{ parameters.platform }}-${{ parameters.buildConfig }}'
+      path: '$(Build.SourcesDirectory)'
+  - task: ExtractFiles@1
+    displayName: 'Extract build.zip'
+    inputs: 
+      archiveFilePatterns: 'build.zip'
+      destinationFolder: '$(Build.SourcesDirectory)'
+      cleanDestinationFolder: false
+  - script: ctest --build-config ${{ parameters.buildConfig }} --verbose --output-on-failure --test-action Test
+    displayName: 'CTest'
+    workingDirectory: 'build'
+  - task: PublishTestResults@2
+    displayName: 'Publish test results'
+    inputs:
+      testResultsFormat: cTest
+      testResultsFiles: build/Testing/*/Test.xml
+      testRunTitle: $(Agent.JobName)
+      configuration: ${{ parameters.buildConfig }}
+    condition: succeededOrFailed()
+

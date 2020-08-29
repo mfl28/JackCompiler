@@ -1,4 +1,5 @@
 #include "SymbolTable.h"
+#include <string>
 
 using std::string;
 
@@ -47,7 +48,7 @@ namespace JackCompiler {
         return SymbolKind::NONE;
     }
 
-    std::string SymbolTable::typeOf(const string& name) {
+    string SymbolTable::typeOf(const string& name) {
         if(!classScope_) {
             if(const auto it = subroutineScopeTable_.find(name); it != subroutineScopeTable_.cend()) {
                 return it->second.type;

@@ -1,0 +1,57 @@
+# Azure Pipeline
+# https://docs.microsoft.com/en-us/azure/devops/pipelines
+
+trigger:
+  branches:
+    include:
+    - master
+  tags:
+    include:
+    - '*'
+      
+stages:
+- stage: Build
+  jobs:
+  - template: jobs/build.yml
+    parameters:
+      name: Linux
+      platform: linux
+      pool:
+        vmImage: 'ubuntu-latest'
+      buildVariables:
+        CC: gcc-8
+        CXX: g++-8
+  - template: jobs/build.yml
+    parameters:
+      name: Windows
+      platform: win
+      pool:
+        vmImage: 'windows-latest'
+  - template: jobs/build.yml
+    parameters:
+      name: MacOS
+      platform: mac
+      pool:
+        vmImage: 'macOS-latest'
+- stage: Test
+  dependsOn: Build
+  jobs:
+  - template: jobs/test.yml
+    parameters:
+      name: Linux
+      platform: linux
+      pool:
+        vmImage: 'ubuntu-latest'
+  - template: jobs/test.yml
+    parameters:
+      name: Windows
+      platform: win
+      pool:
+        vmImage: 'windows-latest'
+  - template: jobs/test.yml
+    parameters:
+      name: MacOS
+      platform: mac
+      pool:
+        vmImage: 'macOS-latest'
+
