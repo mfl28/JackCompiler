@@ -1,4 +1,13 @@
-# JackCompiler [![Build Status](https://travis-ci.org/mfl28/JackCompiler.svg?branch=master)](https://travis-ci.org/mfl28/JackCompiler) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/mfl28/JackCompiler.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/mfl28/JackCompiler/context:cpp)
+# JackCompiler 
+[![Build Status](https://dev.azure.com/mfl28/JackCompiler/_apis/build/status/mfl28.JackCompiler?branchName=master)](https://dev.azure.com/mfl28/JackCompiler/_build/latest?definitionId=5&branchName=master)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/mfl28/JackCompiler.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/mfl28/JackCompiler/context:cpp)
+
+| OS      | Build & Test Pipeline Status                                                                                                                                                                                                                   |
+| ------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| Linux   |[![Build Status](https://dev.azure.com/mfl28/JackCompiler/_apis/build/status/mfl28.JackCompiler?branchName=master&stageName=Test&jobName=Linux)](https://dev.azure.com/mfl28/JackCompiler/_build/latest?definitionId=5&branchName=master) |
+| MacOS   |[![Build Status](https://dev.azure.com/mfl28/JackCompiler/_apis/build/status/mfl28.JackCompiler?branchName=master&stageName=Test&jobName=MacOS)](https://dev.azure.com/mfl28/JackCompiler/_build/latest?definitionId=5&branchName=master) |
+| Windows |[![Build Status](https://dev.azure.com/mfl28/JackCompiler/_apis/build/status/mfl28.JackCompiler?branchName=master&stageName=Test&jobName=Windows)](https://dev.azure.com/mfl28/JackCompiler/_build/latest?definitionId=5&branchName=master) |
+
 This is a C++-implementation of a compiler for the Jack programming language defined in [project 9](https://www.nand2tetris.org/project9) of the nand2tetris-course.
 The program takes as argument either a single `.jack`-file or a directory containing such files, compiles the file(s) into Hack virtual-machine language code and writes the result to one or more `.vm`-file(s).
 
